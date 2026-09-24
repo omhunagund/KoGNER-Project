@@ -14,7 +14,7 @@ An AI-powered biomedical text analysis platform that integrates Natural Language
 
 # 📖 Project Overview
 
-KoGNER is an AI-powered biomedical text analysis platform developed as a final-year Computer Science (Data Science) project. The system combines Natural Language Processing (NLP), BioBERT, Biomedical Named Entity Recognition (NER), Knowledge Graph Construction, Graph Neural Networks (GNNs), and Knowledge Graph Distillation into a single interactive application.
+KoGNER is an AI-powered biomedical text analysis platform developed as a final-year Computer Science (Data Science) project. The system combines Natural Language Processing (NLP), a pretrained Biomedical NER model, Knowledge Graph Construction, Graph Neural Networks (GNNs), and Knowledge Graph Distillation into a single interactive application.
 
 The platform processes biomedical text to identify important medical entities such as diseases, drugs, symptoms, procedures, therapies, and biological structures. These entities are transformed into a knowledge graph that captures semantic relationships between them. A Graph Neural Network is then applied to analyze the graph structure, followed by a Knowledge Graph Distillation module that reduces graph complexity while preserving essential information.
 
@@ -25,7 +25,7 @@ KoGNER provides an intuitive Streamlit-based interface with interactive visualiz
 # 🎯 Project Objectives
 
 - Develop an end-to-end biomedical text analysis platform.
-- Perform biomedical named entity recognition using BioBERT.
+- Perform biomedical named entity recognition using the pretrained Clinical-AI-Apollo/Medical-NER model.
 - Apply NLP preprocessing and linguistic analysis.
 - Construct semantic knowledge graphs from extracted entities.
 - Analyze graph structures using Graph Neural Networks (GNNs).
@@ -47,6 +47,9 @@ KoGNER provides an intuitive Streamlit-based interface with interactive visualiz
 - 📥 Downloadable Results (CSV & Graph Outputs)
 - 🌐 Modern Multi-Page Streamlit Interface
 - 📈 Interactive Charts and Visualizations
+- 📤 Multi-Format Biomedical File Upload
+- 📄 PDF, DOCX, TXT, CSV, XLSX File Support
+- 🖼️ Image Text Extraction using OCR
 
 ---
 
@@ -57,30 +60,44 @@ biomedical text is processed through entity recognition, linguistic analysis,
 graph construction, graph analysis, and knowledge graph distillation.
 
 ```text
-Biomedical Text
-      │
-      ▼
+Biomedical Text Input
+       │
+       ├── Manual Text Entry
+       │
+       └── File Upload
+            │
+            ├── PDF
+            ├── DOCX
+            ├── TXT
+            ├── CSV
+            ├── XLSX
+            └── JPG / JPEG / PNG → OCR
+       │
+       ▼
+Text Ready for Analysis
+       │
+       ▼
 Biomedical Named Entity Recognition
-      │
-      ▼
+       │
+       ▼
 NLP Processing
-      │
-      ▼
+       │
+       ▼
 BioBERT Analysis
-      │
-      ▼
+       │
+       ▼
 Knowledge Graph Construction
-      │
-      ▼
+       │
+       ▼
 Graph Neural Network Analysis
-      │
-      ▼
+       │
+       ▼
 Knowledge Graph Distillation
-      │
-      ▼
+       │
+       ▼
 Analytics Dashboard
-      │
-      ▼
+       │
+       ▼
 Download Results
 ```
 
@@ -95,23 +112,25 @@ knowledge graph construction, graph analysis, and knowledge graph distillation.
 ```mermaid
 flowchart TD
 
-    A[Biomedical Text Input]
+    A[Biomedical Input]
 
-    B[Biomedical Named Entity Recognition<br/>BioBERT / Medical-NER]
+    B[File Upload & Text Extraction<br/>PDF • DOCX • TXT • CSV • XLSX • Images/OCR]
 
-    C[NLP Processing<br/>Cleaning • Tokenization • Lemmatization • POS Tagging]
+    C[Biomedical Named Entity Recognition<br/>BioBERT / Medical-NER]
 
-    D[BioBERT Analysis<br/>Entity & Confidence Analysis]
+    D[NLP Processing<br/>Cleaning • Tokenization • Lemmatization • POS Tagging]
 
-    E[Knowledge Graph Construction<br/>Nodes & Relationships]
+    E[BioBERT Analysis<br/>Entity & Confidence Analysis]
 
-    F[GNN Analysis<br/>Graph Metrics & Node Importance]
+    F[Knowledge Graph Construction<br/>Nodes & Relationships]
 
-    G[Knowledge Graph Distillation<br/>Graph Simplification]
+    G[GNN Analysis<br/>Graph Metrics & Node Importance]
 
-    H[Analytics Dashboard<br/>Statistics & Visualizations]
+    H[Knowledge Graph Distillation<br/>Graph Simplification]
 
-    I[Download Results<br/>CSV & Analysis Outputs]
+    I[Analytics Dashboard<br/>Statistics & Visualizations]
+
+    J[Download Results<br/>CSV & Analysis Outputs]
 
     A --> B
     B --> C
@@ -121,6 +140,7 @@ flowchart TD
     F --> G
     G --> H
     H --> I
+    I --> J
 ```
 
 The architecture is implemented as a multi-page Streamlit application, with
@@ -200,6 +220,7 @@ KoGNER_Project/
 ├── utils/
 │   ├── config.py
 │   ├── constants.py
+│   ├── file_extractor.py
 │   ├── helpers.py
 │   ├── logger.py
 │   ├── sample_predictions.py
@@ -228,6 +249,10 @@ KoGNER_Project/
 | Graph Processing | NetworkX |
 | Data Processing | Pandas |
 | Visualization | Matplotlib |
+| PDF Extraction | PyPDF |
+| Word Processing | python-docx |
+| Spreadsheet Processing | OpenPyXL |
+| OCR | Tesseract OCR / pytesseract |
 
 ---
 
@@ -257,7 +282,7 @@ for potential future model fine-tuning and evaluation.
 |---------|-------------|
 | 🏠 Home | Introduces the project and presents the overall workflow. |
 | 📘 About Project | Explains objectives, architecture, methodology, datasets, and frameworks. |
-| 🧬 Biomedical NER | Extracts biomedical entities from input text using BioBERT. |
+| 🧬 Biomedical NER | Accepts biomedical text or uploaded files and performs biomedical entity recognition using the pretrained Clinical-AI-Apollo/Medical-NER model. |
 | 📝 NLP Processing | Performs preprocessing, tokenization, lemmatization, and POS tagging. |
 | 🤖 BioBERT Analysis | Displays detected entities, confidence scores, and prediction analytics. |
 | 🕸️ Knowledge Graph | Builds and visualizes relationships between biomedical entities. |
@@ -272,12 +297,14 @@ for potential future model fine-tuning and evaluation.
 
 - End-to-end biomedical text analysis pipeline
 - Multi-page interactive Streamlit application
-- BioBERT-powered biomedical entity recognition
+- Pretrained Biomedical NER model for entity recognition
 - Automated Knowledge Graph generation
 - Graph Neural Network (GNN) analysis
 - Knowledge Graph Distillation framework
 - Interactive dashboards with multiple visualizations
 - Exportable CSV reports and processed outputs
+- Multi-format biomedical document and image input
+- Automated text extraction and OCR
 
 ---
 
@@ -331,6 +358,49 @@ source .venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+## 5. Install Tesseract OCR
+
+Image text extraction requires Tesseract OCR.
+
+### Windows
+
+Install Tesseract OCR and make sure its installation directory is added
+to the system PATH.
+
+The default installation path is commonly:
+
+```text
+C:\Program Files\Tesseract-OCR
+```
+
+After installation, verify it with:
+
+```bash
+tesseract --version
+```
+
+The Python package `pytesseract` is included in `requirements.txt`.
+This is particularly important because `pip install pytesseract` alone does **not** install the
+Tesseract OCR executable.
+
+# 📤 Supported Input File Formats
+
+KoGNER accepts biomedical text through direct text entry or file upload.
+
+| Format  | Processing              |
+|---------|--------------------------|
+| `.txt`  | Direct text extraction   |
+| `.pdf`  | Text extraction          |
+| `.docx` | Paragraph extraction     |
+| `.csv`  | Cell content extraction  |
+| `.xlsx` | Worksheet content extraction |
+| `.jpg`  | OCR                      |
+| `.jpeg` | OCR                      |
+| `.png`  | OCR                      |
+
+After extraction, the text is placed into the biomedical text input area
+for review or editing before analysis.
 
 ---
 
