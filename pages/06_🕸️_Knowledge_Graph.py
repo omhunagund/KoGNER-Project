@@ -44,6 +44,15 @@ graph = build_graph(entities)
 # Color Mapping
 # -----------------------------------------
 
+STANDARD_ENTITY_TYPES = {
+    "DRUG",
+    "DISEASE",
+    "BIOLOGICAL_STRUCTURE",
+    "PROCEDURE",
+    "THERAPY",
+    "SYMPTOM"
+}
+
 COLOR_MAP = {
 
     "DRUG": "#2ECC71",
@@ -51,12 +60,12 @@ COLOR_MAP = {
     "BIOLOGICAL_STRUCTURE": "#3498DB",
     "PROCEDURE": "#F39C12",
     "THERAPY": "#9B59B6",
-    "SYMPTOM": "#F1C40F"
+    "SYMPTOM": "#F1C40F",
+    "EXTRA": "#95A5A6"
 
 }
 
-DEFAULT_COLOR = "#95A5A6"
-
+display_entity_types = {}
 node_colors = []
 
 for node in graph.nodes():
@@ -66,12 +75,13 @@ for node in graph.nodes():
         ""
     )
 
-    node_colors.append(
-        COLOR_MAP.get(
-            entity_type,
-            DEFAULT_COLOR
-        )
-    )
+    if entity_type in STANDARD_ENTITY_TYPES:
+        display_type = entity_type
+    else:
+        display_type = "EXTRA"
+
+    display_entity_types[node] = display_type
+    node_colors.append(COLOR_MAP[display_type])
 
 # -----------------------------------------
 # Graph Summary
@@ -202,22 +212,39 @@ legend_elements = [
         markerfacecolor=COLOR_MAP["SYMPTOM"],
         markeredgecolor='black',
         markersize=10
-    )
+    ),
 
+    Line2D(
+        [0], [0],
+        marker='o',
+        color='w',
+        label='Extra',
+        markerfacecolor=COLOR_MAP["EXTRA"],
+        markeredgecolor='black',
+        markersize=10
+    )
 ]
 
 ax.legend(
     handles=legend_elements,
-    loc="upper left",
+    loc="lower left",
+    bbox_to_anchor=(0, 1.02),
     fontsize=9,
     frameon=True,
     fancybox=True,
-    shadow=True
+    shadow=True,
+    ncol=4,
+    borderaxespad=0
 )
 
 ax.set_axis_off()
 
-plt.tight_layout()
+plt.subplots_adjust(
+    top=0.80,
+    left=0.02,
+    right=0.98,
+    bottom=0.02
+)
 
 st.pyplot(fig)
 
@@ -236,7 +263,7 @@ for node, attrs in graph.nodes(data=True):
     nodes.append({
 
         "Entity": node,
-        "Type": attrs.get("entity_type", ""),
+        "Type": display_entity_types.get(node, "EXTRA"),
         "Confidence": attrs.get("confidence", "")
 
     })

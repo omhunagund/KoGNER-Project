@@ -134,6 +134,15 @@ st.divider()
 # Graph Color Mapping
 # --------------------------------------------------------
 
+STANDARD_ENTITY_TYPES = {
+    "DRUG",
+    "DISEASE",
+    "BIOLOGICAL_STRUCTURE",
+    "PROCEDURE",
+    "THERAPY",
+    "SYMPTOM"
+}
+
 COLOR_MAP = {
 
     "DRUG": "#2ECC71",
@@ -141,17 +150,26 @@ COLOR_MAP = {
     "BIOLOGICAL_STRUCTURE": "#3498DB",
     "PROCEDURE": "#F39C12",
     "THERAPY": "#9B59B6",
-    "SYMPTOM": "#F1C40F"
+    "SYMPTOM": "#F1C40F",
+    "EXTRA": "#95A5A6"
 
 }
 
-DEFAULT_COLOR = "#95A5A6"
+
+def get_display_entity_type(entity_type):
+    """
+    Map non-standard entity types to EXTRA for graph visualization.
+    """
+    if entity_type in STANDARD_ENTITY_TYPES:
+        return entity_type
+
+    return "EXTRA"
 
 # --------------------------------------------------------
 # Shared Graph Drawing Function
 # --------------------------------------------------------
 
-def draw_graph(graph, title):
+def draw_graph(graph):
 
     fig, ax = plt.subplots(figsize=(8.5, 6.5))
 
@@ -171,11 +189,10 @@ def draw_graph(graph, title):
             ""
         )
 
+        display_type = get_display_entity_type(entity_type)
+
         node_colors.append(
-            COLOR_MAP.get(
-                entity_type,
-                DEFAULT_COLOR
-            )
+            COLOR_MAP[display_type]
         )
 
     nx.draw_networkx_nodes(
@@ -241,6 +258,12 @@ def draw_graph(graph, title):
                label='Symptom',
                markerfacecolor=COLOR_MAP["SYMPTOM"],
                markeredgecolor='black',
+               markersize=8),
+
+        Line2D([0],[0], marker='o', color='w',
+               label='Extra',
+               markerfacecolor=COLOR_MAP["EXTRA"],
+               markeredgecolor='black',
                markersize=8)
 
     ]
@@ -248,22 +271,23 @@ def draw_graph(graph, title):
     ax.legend(
         handles=legend_elements,
         fontsize=8,
-        loc="upper left",
+        loc="lower left",
+        bbox_to_anchor=(0, 1.02),
         frameon=True,
         fancybox=True,
-        shadow=True
-    )
-
-    ax.set_title(
-        title,
-        fontsize=15,
-        fontweight="bold",
-        pad=12
+        shadow=True,
+        ncol=4,
+        borderaxespad=0
     )
 
     ax.set_axis_off()
 
-    plt.tight_layout()
+    plt.subplots_adjust(
+        top=0.80,
+        left=0.02,
+        right=0.98,
+        bottom=0.02
+    )
 
     return fig
 
@@ -280,10 +304,7 @@ with left:
     st.subheader("📘 Original Knowledge Graph")
 
     st.pyplot(
-        draw_graph(
-            graph,
-            "Original Graph"
-        )
+        draw_graph(graph)
     )
 
     col1, col2 = st.columns(2)
@@ -300,10 +321,7 @@ with right:
     st.subheader("✨ Distilled Knowledge Graph")
 
     st.pyplot(
-        draw_graph(
-            distilled_graph,
-            "Distilled Graph"
-        )
+        draw_graph(distilled_graph)
     )
 
     col3, col4 = st.columns(2)
@@ -358,9 +376,8 @@ for node in distilled_graph.nodes(data=True):
 
         "Biomedical Entity": node[0],
 
-        "Entity Type": node[1].get(
-            "entity_type",
-            "-"
+        "Entity Type": get_display_entity_type(
+            node[1].get("entity_type", "")
         ),
 
         "Confidence": node[1].get(
@@ -444,9 +461,8 @@ for node, attrs in graph.nodes(data=True):
 
     if node == top_entity:
 
-        entity_type = attrs.get(
-            "entity_type",
-            "-"
+        entity_type = get_display_entity_type(
+            attrs.get("entity_type", "")
         )
 
         confidence = attrs.get(
